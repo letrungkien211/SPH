@@ -9,14 +9,8 @@ using namespace Eigen;
 #define Vec 		Vector2d
 
 //////////////////////////////////////////////////////////////////////////
-// Physics constant
-#define G			9.78*10e2
-#define DT			1e-2f
-#define PI			3.14159
 //////////////////////////////////////////////////////////////////////////
 static const int TIMER = 25;
-static const double RED[4] = {0,0,1,1};
-static const double LIGHTPOS[4] = {0.0, 3.0, 5.0, 1.0};
 
 static int winWidth = 500.0;
 static int winHeight = 500.0;
@@ -24,26 +18,43 @@ static int mouseButton = 0;
 static int mouseState;
 static double mouseX, mouseY;
 
-/* Simulation constants*/
-static const int NUM = 1000;
-
-static const double KERNEL_POLY6 = 1.56668147106;
-static const double KERNEL_SPIKY = 4.77464829276;
-static const double KERNEL_VISCO = 2.38732414638;
-
-//////////////////////////////////////////////////////////////////////////
-static const double RANGE = 20;
-static const Vec MIN = RANGE*Vec( 0, 0);
-static const Vec MAX = RANGE*Vec( 1.0, 1.0);
-static const Vec INIT_MIN = RANGE*Vec( 0.1, 0.1);
-static const Vec INIT_MAX = RANGE*Vec( 0.9, 0.9);
-
-static const double RADIUS = 0.01; // radius
-
-// Color
 static const Vector3d COLOR_RED = Vector3d(1,0,0);
 static const Vector3d COLOR_GREEN = Vector3d(0,1,0);
 static const Vector3d COLOR_BLUE = Vector3d(0,0,1);
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+/* Simulation constants*/
+static const int NUM = 1000;
+
+static const double KERNEL_VISCO = 2.38732414638;
+
+//////////////////////////////////////////////////////////////////////////
+static int MAX_LOOP = 1000;
+static Vec INITMIN = Vec(0,0);
+static Vec INITMAX = Vec(10,20);
+static Vec MIN = Vec(0,0);
+static Vec MAX = Vec(20,20);
+static double PI = 3.141;
+static double RADIUS = 0.004;
+static double H = 3*RADIUS;
+static Vec G = Vec(0,-9.78);
+static double SPH_PMASS = 0.00020543;
+static double SPH_INTSTIFF = 1.00;
+static double SPH_EXTSTIFF = 10000.0;
+static double SPH_EXTDAMP = 256.0;
+static double Poly6Kern = 315.0 / ( 64.0 * PI * pow( H, 9 ) );
+static double SpikyKern = -45.0 / ( PI * pow( H, 6 ) );
+static double LapKern = 45.0 / ( PI * pow( H, 6 ) );
+static double DT = 0.004;
+static double EPSILON = 1e-6;
+static double SPH_RESTDENSITY = 600.0;
+static double SPH_PDIST = pow( SPH_PMASS / SPH_RESTDENSITY, 1/3.0 );
+static double SPH_SIMSCALE = 0.004;
+static double SPH_VISC = 0.2;
+static double SPH_LIMIT = 200.0;		// Speed Limit
+
 
 // Auxiliary functions
 double randf(double min, double max);

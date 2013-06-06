@@ -20,17 +20,17 @@ void System::init(int N) {
 	particles.resize(N);
 	For(i,0,N)
 	{
-		particles[i].r << randf(INIT_MIN, INIT_MAX);
+		particles[i].r << randf(INITMIN, INITMAX);
 		particles[i].radius = RADIUS;
-		particles[i].v << randf(INIT_MIN, INIT_MAX)/100;
+		particles[i].v << randf(INITMIN, INITMAX) / 100;
 		particles[i].color << 1, 0, 0;
 		particles[i].rho0 = 600;
 		particles[i].k = 1;
 		particles[i].myu = 0.2;
 		particles[i].m = 0.00020543;
 	}
-	h = 5*RADIUS;
-	cout << " H "<< h <<endl;
+	h = 5 * RADIUS;
+	cout << " H " << h << endl;
 	getchar();
 }
 
@@ -47,7 +47,6 @@ void System::draw() {
 	glPopMatrix();
 	glEnd();
 
-
 	// Draw particles
 	for (Particle p : particles) {
 		p.draw();
@@ -58,69 +57,92 @@ void System::draw() {
 void System::calculate(double dt) {
 	// Grids
 	grids.build(particles, MAX);
-
+	double H2 = H * H;
 	// Density and Pressure
 
 	For(i,0,N)
 	{
-		// Density
-		particles[i].rho = 0;
+		double sum = 0.0;
+		Particle &pi = particles[i];
+
 		for (int j : grids.neighbor[i]) {
-			double r2 = (particles[i].r - particles[j].r).squaredNorm();
-			double h2 = h * h;
-			if (r2 < h2)
-				particles[i].rho += pow(h2 - r2, 3);
+			Particle &pj = particles[j];
+			Vec dr = (pi.r - pj.r) * SPH_SIMSCALE;
+			double r2 = dr.squaredNorm();
+			if (H2 > r2) {
+				double c = H2 - r2;
+				sum += c * c * c;
+			}
 		}
-		particles[i].rho *= KERNEL_POLY6 / pow(h, 6);
-		// Pressure
-		particles[i].p = particles[i].k
-				* (particles[i].rho - particles[i].rho0);
-		if(particles[i].p < 0){
-			cout << particles[i].rho <<endl;
-			particles[i].p = 1e-5;
-		}
-		assert(particles[i].p > 0);
+		pi.rho = sum * pi.m * Poly6Kern;
+		pi.p = (pi.rho - SPH_RESTDENSITY) * SPH_INTSTIFF;
 	}
 
 	// Force
-	For(i,0, N){
-		Vec fp(0,0);			// pressure force
-		Vec fv(0,0);			// viscosity force
-		for(int j: grids.neighbor[i]){
-			Vec r = particles[i].r - particles[j].r;
-			double r1 = r.norm();
-			if(r1<h){
-				fp -= particles[j].m*(particles[i].p+particles[j].p)/(2*particles[j].rho)*3.0*pow((h-r1),2)/r1*r;
-				fv += particles[j].m*(particles[j].v-particles[i].v)*(4.5*r1/pow(h,3)+4/pow(h,2)+0.5*h/pow(r1,3));
+	For(i,0, N)
+	{
+		Particle &pi = particles[i];
+		pi.f = Vec(0,0);
+		for (int j : grids.neighbor[i]) {
+			Particle &pj = particles[j];
+			Vec dr = (pi.r - pj.r) * SPH_SIMSCALE;
+			double r = dr.norm();
+			if (H > r) {
+				double c = H - r;
+				double pterm = -0.5 * c * SpikyKern * (pi.p + pj.p) / r;
+				double vterm = LapKern * SPH_VISC;
+				Vec fcurr = (pterm * dr + vterm * (pj.v - pi.v)) * c * pi.rho* pj.rho;
+				;
+				pi.f += fcurr;
 			}
 		}
-		fp *= KERNEL_SPIKY/pow(h,6);
-		fv *= KERNEL_VISCO/pow(h,3)*particles[i].myu;
-
-		particles[i].f = fp;//+fv;
 	}
 
-
-	// 6. position
-	For(i,0,N)
-	{
-		//cout << particles[i].f.transpose() <<endl;
-		particles[i].v += (Vec(0,-G) + particles[i].f/particles[i].m)*dt;
-		particles[i].r += particles[i].v*dt;
-		//cout << "MIN, MAX: " << MIN.transpose() << " : " <<MAX.transpose() <<endl;
-		For(j,0,2)
-		{
-			if (particles[i].r[j] <= MIN[j]) {
-				particles[i].v[j] = -particles[i].v[j];
-				particles[i].r[j] = MIN[j];
-			}
-			else if (particles[i].r[j] >= MAX[j]) {
-				particles[i].v[j] = -particles[i].v[j];
-				particles[i].r[j] = MAX[j];
-			}
+	// Velocity and Position
+	for (Particle &p : particles) {
+		Vec accel = p.f * SPH_PMASS;
+		double speed = accel.squaredNorm();
+		if (speed > SPH_LIMIT * SPH_LIMIT) {
+			accel *= SPH_LIMIT / sqrt(speed);
 		}
-		cout << particles[i].r.transpose() <<endl;
-		assert(particles[i].r[0] >= 0 && particles[i].r[1]>=0);
+
+
+		// X-axis walls
+		double diff, adj;
+
+		diff = 2.0 * RADIUS - ( p.r[0] - MIN[0] ) * SPH_SIMSCALE;
+		if ( diff > EPSILON )
+		{
+			Vec norm(1,0);
+			double adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
+			accel += adj * norm;
+		}
+		diff = 2.0 * RADIUS - ( MAX[0] - p.r[0] ) * SPH_SIMSCALE;
+		if ( diff > EPSILON )
+		{
+			Vec norm(-1,0);
+			adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
+			accel += adj * norm;
+		}
+
+		// Y-axis walls
+		diff = 2.0 * RADIUS - ( p.r(1) - MIN(1) ) * SPH_SIMSCALE;
+		if ( diff > EPSILON )
+		{
+			Vec norm(0,1);
+			adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
+			accel += adj * norm;
+		}
+		diff = 2.0 * RADIUS - ( MAX[1] - p.r[1] ) * SPH_SIMSCALE;
+		if ( diff > EPSILON )
+		{
+			Vec norm(0,-1);
+			adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
+			accel += adj * norm;
+		}
+		accel += G;
+		p.v += accel * DT;
+		p.r += p.v * DT / SPH_SIMSCALE;
 	}
 
 	grids.clear();
