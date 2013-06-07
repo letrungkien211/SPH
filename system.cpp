@@ -7,9 +7,11 @@
 
 #include "system.hpp"
 #include <cstdlib>
+#include <fstream>
 
-System::System() :
+System::System():
 N(0), grids(30, 30){
+	loadParameter(string("param.txt"));
 }
 
 System::~System() {
@@ -165,3 +167,11 @@ void System::calculate(double dt) {
 	grids.clear();
 }
 
+void System::loadParameter(const string &filename){
+	ifstream input(filename.c_str());
+	input >> SPH_INTSTIFF >> SPH_VISC >> H >> RADIUS;
+	H *= RADIUS;
+	Poly6Kern = 315.0 / ( 64.0 * PI * pow( H, 9 ) );
+	SpikyKern = -45.0 / ( PI * pow( H, 6 ) );
+	LapKern = 45.0 / ( PI * pow( H, 6 ) );
+}

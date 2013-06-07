@@ -36,6 +36,9 @@ public:
 	double SPH_EXTSTIFF;
 	double H;
 	double RADIUS;
+	double Poly6Kern;
+	double SpikyKern;
+	double LapKern;
 
 	System();
 	virtual ~System();
@@ -44,9 +47,10 @@ public:
 	Grids grids;
 
 	void init(int N);					// initialize
+	void loadParameter(const string &filename);
 	void draw();						// draw
-	void calculate(double dt);					// calculate density, pressure, force, velocity and position
-	void buildGrid();					// build the grids for neighbor search
+
+	void calculate(double dt);			// calculate density, pressure, force, velocity and position
 	void saveState();					// save state
 };
 #endif /* SYSTEM_HPP_ */

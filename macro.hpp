@@ -41,17 +41,8 @@ static double RADIUS = 0.004;
 static Vec G = Vec(0,-9.78);
 static double SPH_PMASS = 0.00020543;
 
-
-static double SPH_VISC = 2.0;
-static double SPH_INTSTIFF = 1.00;
-
-static double H = 2*RADIUS;
-
 static double SPH_EXTSTIFF = 10000.0;
 static double SPH_EXTDAMP = 256.0;
-static double Poly6Kern = 315.0 / ( 64.0 * PI * pow( H, 9 ) );
-static double SpikyKern = -45.0 / ( PI * pow( H, 6 ) );
-static double LapKern = 45.0 / ( PI * pow( H, 6 ) );
 static double DT = 0.004;
 static double EPSILON = 1e-6;
 static double SPH_RESTDENSITY = 600.0;
@@ -59,8 +50,6 @@ static double SPH_PDIST = pow( SPH_PMASS / SPH_RESTDENSITY, 1/3.0 );
 static double SPH_SIMSCALE = 0.04;
 
 static double SPH_LIMIT = 200.0;		// Speed Limit
-
-
 
 // Auxiliary functions
 double randf(double min, double max);
