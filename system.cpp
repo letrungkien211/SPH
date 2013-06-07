@@ -10,7 +10,7 @@
 #include <fstream>
 
 System::System():
-N(0), grids(30, 30){
+N(0), grids(50, 50){
 	loadParameter(string("param.txt"));
 }
 

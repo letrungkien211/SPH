@@ -33,7 +33,7 @@ public:
 	// SPH Parameters
 	double SPH_VISC;
 	double SPH_INTSTIFF;
-	double SPH_EXTSTIFF;
+    //double SPH_EXTSTIFF;
 	double H;
 	double RADIUS;
 	double Poly6Kern;
