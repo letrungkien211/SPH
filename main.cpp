@@ -16,6 +16,7 @@ using namespace std;
 
 System sph;
 
+
 void myDisplay(){
 	/*Initialize display*/
 	sph.calculate(DT);
@@ -23,7 +24,7 @@ void myDisplay(){
 	glClearColor(1.0,1.0,1.0,1.0);
 
 	glPushMatrix();
-	glScaled(10,10,1);
+	glScaled(40,40,1);
 	sph.draw();
 	glPopMatrix();
 	glutSwapBuffers();

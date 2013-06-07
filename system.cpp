@@ -9,7 +9,7 @@
 #include <cstdlib>
 
 System::System() :
-N(0), grids(30, 30), h(0) {
+N(0), grids(30, 30){
 }
 
 System::~System() {
@@ -24,14 +24,11 @@ void System::init(int N) {
 		particles[i].radius = RADIUS;
 		particles[i].v << randf(INITMIN, INITMAX) / 100;
 		particles[i].color << 1, 0, 0;
-		particles[i].rho0 = 600;
-		particles[i].k = 1;
-		particles[i].myu = 0.2;
-		particles[i].m = 0.00020543;
+		particles[i].rho0 = SPH_RESTDENSITY;
+		particles[i].k = SPH_INTSTIFF;
+		particles[i].myu = SPH_VISC;
+		particles[i].m = SPH_PMASS;
 	}
-	h = 5 * RADIUS;
-	cout << " H " << h << endl;
-	getchar();
 }
 
 void System::draw() {
@@ -48,10 +45,18 @@ void System::draw() {
 	glEnd();
 
 	// Draw particles
+	Vec minR(100,100);
+	Vec maxR(-1,-1);
 	for (Particle p : particles) {
 		p.draw();
+		minR[0] = min((double)minR[0], (double)p.r[0]);
+		minR[1] = min((double)minR[1], (double)p.r[1]);
+		maxR[0] = max((double)maxR[0], (double)p.r[0]);
+		maxR[1] = max((double)maxR[1], (double)p.r[1]);
 	}
-	getchar();
+	cout << "Min, Max: " << minR.transpose() << " : " <<maxR.transpose() <<endl;
+
+	//getchar();
 }
 
 void System::calculate(double dt) {
@@ -60,12 +65,23 @@ void System::calculate(double dt) {
 	double H2 = H * H;
 	// Density and Pressure
 
+	list<int> nei(N);
+	int cnt = 0;
+	for(int &i : nei){
+		i = cnt++;
+	}
+
+
 	For(i,0,N)
 	{
 		double sum = 0.0;
 		Particle &pi = particles[i];
 
 		for (int j : grids.neighbor[i]) {
+		//for (int j : nei) {
+			if(i==j)
+				continue;
+
 			Particle &pj = particles[j];
 			Vec dr = (pi.r - pj.r) * SPH_SIMSCALE;
 			double r2 = dr.squaredNorm();
@@ -84,7 +100,10 @@ void System::calculate(double dt) {
 		Particle &pi = particles[i];
 		pi.f = Vec(0,0);
 		for (int j : grids.neighbor[i]) {
-			Particle &pj = particles[j];
+		//for (int j : nei) {
+			if(i==j)
+							continue;
+						Particle &pj = particles[j];
 			Vec dr = (pi.r - pj.r) * SPH_SIMSCALE;
 			double r = dr.norm();
 			if (H > r) {
@@ -92,7 +111,6 @@ void System::calculate(double dt) {
 				double pterm = -0.5 * c * SpikyKern * (pi.p + pj.p) / r;
 				double vterm = LapKern * SPH_VISC;
 				Vec fcurr = (pterm * dr + vterm * (pj.v - pi.v)) * c * pi.rho* pj.rho;
-				;
 				pi.f += fcurr;
 			}
 		}
@@ -105,7 +123,6 @@ void System::calculate(double dt) {
 		if (speed > SPH_LIMIT * SPH_LIMIT) {
 			accel *= SPH_LIMIT / sqrt(speed);
 		}
-
 
 		// X-axis walls
 		double diff, adj;

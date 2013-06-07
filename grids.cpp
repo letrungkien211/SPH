@@ -23,13 +23,11 @@ void Grids::build(const vector<Particle> &ps, const Vec &range){
 	clear();
 	if(neighbor.size() < ps.size())
 		neighbor.resize(ps.size());
-	Vec factor((double)(M-3)/(range[0]), (double)(N-3)/(range[1]));
+	Vec factor((double)(M-2)/(range[0]+2), (double)(N-2)/(range[1]+2));
 	For(i,0,ps.size()){
-		int x = max(0.0, ps[i].r[0]*factor[0]);
-		int y = max(0.0,ps[i].r[1]*factor[1]);
+		int x = (ps[i].r[0]+1)*factor[0]+1;
+		int y = (ps[i].r[1]+1)*factor[1]+1;
 		assert(y*M+x<M*N);
-		if(y*M+x<0)
-			cout << x << " , " << y <<endl;
 		assert(y*M+x>=0);
 		(*this)(x,y).push_back(i);
 	}

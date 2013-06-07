@@ -30,13 +30,18 @@ using namespace std;
 
 class System {
 public:
+	// SPH Parameters
+	double SPH_VISC;
+	double SPH_INTSTIFF;
+	double SPH_EXTSTIFF;
+	double H;
+	double RADIUS;
+
 	System();
 	virtual ~System();
-	int N;   		// number of particles
+	int N;   							// number of particles
 	vector<Particle> particles; 		// vector of particles
 	Grids grids;
-
-	double h;
 
 	void init(int N);					// initialize
 	void draw();						// draw
