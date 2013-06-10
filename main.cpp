@@ -32,7 +32,7 @@ void myDisplay(){
 
 void myInit(){
 	glEnable(GL_DEPTH_TEST);
-	sph.init(NUM);
+	sph.init();
 }
 
 void myIdle(){

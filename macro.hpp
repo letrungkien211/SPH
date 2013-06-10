@@ -25,22 +25,17 @@ static const Vector3d COLOR_BLUE = Vector3d(0,0,1);
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 /* Simulation constants*/
-static const int NUM = 4000;
-
-static const double KERNEL_VISCO = 2.38732414638;
-
 //////////////////////////////////////////////////////////////////////////
 static int MAX_LOOP = 1000;
 static Vec INITMIN = Vec(1,1);
 static Vec INITMAX = Vec(2,2);
-static Vec MIN = Vec(0.1,0.1);
+static Vec MIN = Vec(0.5,0.5);
 static Vec MAX = 5*Vec(1,1);
 static double PI = 3.141;
-static double RADIUS = 0.004;
 
 static Vec G = Vec(0,-9.78);
 static double SPH_PMASS = 0.00020543;
-
+//static double SPH_PMASS = 0.0020543;
 static double SPH_EXTSTIFF = 10000.0;
 static double SPH_EXTDAMP = 256.0;
 static double DT = 0.004;

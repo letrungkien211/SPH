@@ -9,23 +9,21 @@
 #include <cstdlib>
 #include <fstream>
 
-System::System():
-N(0), grids(100, 100){
+System::System():grids(100, 100){
 	loadParameter(string("param.txt"));
 }
 
 System::~System() {
 }
 
-void System::init(int N) {
-	this->N = N;
+void System::init() {
 	particles.resize(N);
 	For(i,0,N)
 	{
 		particles[i].r << randf(INITMIN, INITMAX);
 		particles[i].radius = RADIUS;
 		particles[i].v << randf(INITMIN, INITMAX) / 100;
-		particles[i].color << randf(Vector3d(0,0,0), Vector3d(1,1,1));
+		particles[i].color << randf(Vector3d(0,0,0), Vector3d(1,0,0));
 		particles[i].rho0 = SPH_RESTDENSITY;
 		particles[i].k = SPH_INTSTIFF;
 		particles[i].myu = SPH_VISC;
@@ -91,10 +89,11 @@ void System::calculate(double dt) {
 		if(pi.rho > max)
 			max = pi.rho;
 		pi.p = (pi.rho - pi.rho0) * pi.k;
+		pi.rho = 1.0/pi.rho;
 	}
 
 	For(i,0,N){
-		particles[i].color = Vector3d(particles[i].rho,0,0)/max;
+	    particles[i].color[0] = 0.8/(particles[i].rho*max)+0.2;
 	}
 
 	// Force
@@ -139,6 +138,7 @@ void System::calculate(double dt) {
 			Vec norm(1,0);
 			double adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
 			accel += adj * norm;
+//			p.r[0] = MIN[0] + 2*RADIUS/SPH_SIMSCALE;
 		}
 		diff = 2.0 * RADIUS - ( MAX[0] - p.r[0] ) * SPH_SIMSCALE;
 		if ( diff > EPSILON )
@@ -146,6 +146,7 @@ void System::calculate(double dt) {
 			Vec norm(-1,0);
 			adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
 			accel += adj * norm;
+//			p.r[0] = MAX[0] - 2*RADIUS/SPH_SIMSCALE;
 		}
 
 		// Y-axis walls
@@ -155,6 +156,7 @@ void System::calculate(double dt) {
 			Vec norm(0,1);
 			adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
 			accel += adj * norm;
+//			p.r[1] = MIN[1] + 2*RADIUS/SPH_SIMSCALE;
 		}
 		diff = 2.0 * RADIUS - ( MAX[1] - p.r[1] ) * SPH_SIMSCALE;
 		if ( diff > EPSILON )
@@ -162,6 +164,7 @@ void System::calculate(double dt) {
 			Vec norm(0,-1);
 			adj = SPH_EXTSTIFF * diff - SPH_EXTDAMP * norm.transpose()*p.v;
 			accel += adj * norm;
+//			p.r[1] = MAX[1] - 2*RADIUS/SPH_SIMSCALE;
 		}
 		accel += G;
 		p.v += accel * DT;
@@ -173,7 +176,7 @@ void System::calculate(double dt) {
 
 void System::loadParameter(const string &filename){
 	ifstream input(filename.c_str());
-	input >> SPH_INTSTIFF >> SPH_VISC >> H >> RADIUS;
+	input >> SPH_INTSTIFF >> SPH_VISC >> H >> RADIUS >> N;
 	H *= RADIUS;
 	Poly6Kern = 315.0 / ( 64.0 * PI * pow( H, 9 ) );
 	SpikyKern = -45.0 / ( PI * pow( H, 6 ) );

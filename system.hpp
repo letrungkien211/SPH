@@ -46,7 +46,7 @@ public:
 	vector<Particle> particles; 		// vector of particles
 	Grids grids;
 
-	void init(int N);					// initialize
+	void init();					// initialize
 	void loadParameter(const string &filename);
 	void draw();						// draw
 
