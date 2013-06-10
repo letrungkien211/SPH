@@ -14,7 +14,7 @@
 void Particle::draw(){
 	glPushMatrix();
 	glTranslated((double)r[0], (double)r[1], 0.0);
-	glColor3d(1,0,0);
+	glColor3d(color[0], color[1], color[2]);
 	glCircle((double)r[0], (double)r[1], 10*radius, 20);
 	glPopMatrix();
 }

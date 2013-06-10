@@ -10,7 +10,7 @@
 #include <fstream>
 
 System::System():
-N(0), grids(50, 50){
+N(0), grids(100, 100){
 	loadParameter(string("param.txt"));
 }
 
@@ -25,7 +25,7 @@ void System::init(int N) {
 		particles[i].r << randf(INITMIN, INITMAX);
 		particles[i].radius = RADIUS;
 		particles[i].v << randf(INITMIN, INITMAX) / 100;
-		particles[i].color << 1, 0, 0;
+		particles[i].color << randf(Vector3d(0,0,0), Vector3d(1,1,1));
 		particles[i].rho0 = SPH_RESTDENSITY;
 		particles[i].k = SPH_INTSTIFF;
 		particles[i].myu = SPH_VISC;
@@ -47,23 +47,21 @@ void System::draw() {
 	glEnd();
 
 	// Draw particles
-	Vec minR(100,100);
-	Vec maxR(-1,-1);
 	for (Particle p : particles) {
 		p.draw();
-		minR[0] = min((double)minR[0], (double)p.r[0]);
-		minR[1] = min((double)minR[1], (double)p.r[1]);
-		maxR[0] = max((double)maxR[0], (double)p.r[0]);
-		maxR[1] = max((double)maxR[1], (double)p.r[1]);
 	}
-	cout << "Min, Max: " << minR.transpose() << " : " <<maxR.transpose() <<endl;
-
-	//getchar();
 }
 
 void System::calculate(double dt) {
 	// Grids
 	grids.build(particles, MAX);
+
+	int sum = 0;
+	for(list<int> l : grids.neighbor){
+		sum += l.size();
+	}
+	cout << sum <<endl;
+
 	double H2 = H * H;
 	// Density and Pressure
 
@@ -73,17 +71,14 @@ void System::calculate(double dt) {
 		i = cnt++;
 	}
 
-
+	// Density and pressure and
+	double max = -1;
 	For(i,0,N)
 	{
 		double sum = 0.0;
 		Particle &pi = particles[i];
 
 		for (int j : grids.neighbor[i]) {
-		//for (int j : nei) {
-			if(i==j)
-				continue;
-
 			Particle &pj = particles[j];
 			Vec dr = (pi.r - pj.r) * SPH_SIMSCALE;
 			double r2 = dr.squaredNorm();
@@ -93,7 +88,13 @@ void System::calculate(double dt) {
 			}
 		}
 		pi.rho = sum * pi.m * Poly6Kern;
-		pi.p = (pi.rho - SPH_RESTDENSITY) * SPH_INTSTIFF;
+		if(pi.rho > max)
+			max = pi.rho;
+		pi.p = (pi.rho - pi.rho0) * pi.k;
+	}
+
+	For(i,0,N){
+		particles[i].color = Vector3d(particles[i].rho,0,0)/max;
 	}
 
 	// Force
@@ -118,9 +119,12 @@ void System::calculate(double dt) {
 		}
 	}
 
+
+
+
 	// Velocity and Position
 	for (Particle &p : particles) {
-		Vec accel = p.f * SPH_PMASS;
+		Vec accel = p.f * p.m;
 		double speed = accel.squaredNorm();
 		if (speed > SPH_LIMIT * SPH_LIMIT) {
 			accel *= SPH_LIMIT / sqrt(speed);
