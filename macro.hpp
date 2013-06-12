@@ -4,7 +4,6 @@
  *  Created on: Jun 12, 2013
  *      Author: letrungkien7
  */
-
 #ifndef MACRO_HPP_
 #define MACRO_HPP_
 
@@ -30,6 +29,7 @@ static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kQuadraticViscocity 1.0f
 
 #define kParticleRadius 0.05f
+//const double kH = (6*kParticleRadius);
 const double kH = (6*kParticleRadius);
 const double kH2 = kH*kH;
 
@@ -44,6 +44,7 @@ static const double kNearNorm =(30/(2*kPi*kH*kH));
 #define kEpsilon 0.0000001f
 static const double kEpsilon2 = (kEpsilon*kEpsilon);
 
+//#define kCellSize kH
 #define kCellSize kH
 static const int kGridWidth = (size_t)(kViewWidth / kCellSize);
 static const int kGridHeight = (size_t)(kViewHeight / kCellSize);

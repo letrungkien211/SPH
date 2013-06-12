@@ -23,7 +23,10 @@ void SPH::init() {
 		Particle &p = particles[i];
 		p.r = randf(Vec(2,2), Vec(8,8));
 		p.v = randf(Vec(0,0), Vec(1,1));
-		p.m = 1.0f;
+		if(i%2)
+		    p.m = 1.0f;
+		else
+		    p.m = 1.4;
 	}
 
 	walls.resize(4);
@@ -36,7 +39,10 @@ void SPH::init() {
 void SPH::display() {
 	For(i,N){
 		Particle p = particles[i];
-		glColor3d(1,0,0);
+		if(i%2)
+		    glColor3d(0,1,0);
+		else
+		    glColor3d(0,0,1);
 		glVertex2d(p.r[0], p.r[1]);
 	}
 }
@@ -130,7 +136,7 @@ void SPH::calculatePressure() {
 		pi.nearP = kNearStiffness * pi.nearDensity;
 	}
 
-	cout << "Calculate pressure done!"<<endl;
+//	cout << "Calculate pressure done!"<<endl;
 }
 
 void SPH::calculateRelaxedPositions() {
@@ -167,7 +173,7 @@ void SPH::calculateRelaxedPositions() {
 		pi.rRelax = pos;
 	}
 
-	cout << "Calculate relaxed position done!"<<endl;
+//	cout << "Calculate relaxed position done!"<<endl;
 }
 
 void SPH::moveToRelaxedPositions() {

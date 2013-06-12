@@ -40,12 +40,14 @@ struct Particle{
 	double density;		// density
 	double nearDensity;	// near density
 
+
+//    Vector3d color;
 	// Supplementary
 	Vec rPrev; // previous position
 	Vec rRelax; // relaxed position
 	Vector2i gridIndex; // grid index
 
-	list<Neigbor> neighbors;
+    list<Neigbor> neighbors;
 };
 
 struct Wall{
