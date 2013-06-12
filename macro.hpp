@@ -1,56 +1,58 @@
+/*
+ * macro.hpp
+ *
+ *  Created on: Jun 12, 2013
+ *      Author: letrungkien7
+ */
+
 #ifndef MACRO_HPP_
 #define MACRO_HPP_
 
 #include <eigen3/Eigen/Dense>
+
 using namespace Eigen;
-//////////////////////////////////////////////////////////////////////////
-#define For(i,m,n) 	for(int i = m; i < n; i++)
-#define Sqr(x) 		(x)*(x)
-#define Vec 		Vector2d
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-static const int TIMER = 25;
+#define Vec Vector2d
+#define For(i,n) for(int i = 0; i <n; i++)
 
-static int winWidth = 500.0;
-static int winHeight = 500.0;
-static int mouseButton = 0;
-static int mouseState;
-static double mouseX, mouseY;
+#define kScreenWidth 640
+#define kScreenHeight 640
+#define kViewWidth 10.0f
+static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
+#define kPi 3.1415926535f
+#define kParticleCount 3000
 
-static const Vector3d COLOR_RED = Vector3d(1,0,0);
-static const Vector3d COLOR_GREEN = Vector3d(0,1,0);
-static const Vector3d COLOR_BLUE = Vector3d(0,0,1);
+#define kRestDensity 82.0f
+#define kStiffness 0.08f
+#define kNearStiffness 0.1f
+#define kSurfaceTension 0.0004f
+#define kLinearViscocity 0.5f
+#define kQuadraticViscocity 1.0f
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-/* Simulation constants*/
-//////////////////////////////////////////////////////////////////////////
-static int MAX_LOOP = 1000;
-static Vec INITMIN = Vec(1,1);
-static Vec INITMAX = Vec(4,4);
-static Vec MIN = Vec(0.5,0.5);
-static Vec MAX = 5*Vec(1,1);
-static double PI = 3.141;
+#define kParticleRadius 0.05f
+const double kH = (6*kParticleRadius);
+const double kH2 = kH*kH;
 
-static Vec G = Vec(0,-9.78);
-static double SPH_PMASS = 0.00020543;
-//static double SPH_PMASS = 0.0020543;
-static double SPH_EXTSTIFF = 10000.0;
-static double SPH_EXTDAMP = 256.0;
-static double DT = 0.004;
-static double EPSILON = 1e-6;
-static double SPH_RESTDENSITY = 600.0;
-static double SPH_PDIST = pow( SPH_PMASS / SPH_RESTDENSITY, 1/3.0 );
-static double SPH_SIMSCALE = 0.04;
+#define kFrameRate 20
+#define kSubSteps 7
 
-static double SPH_LIMIT = 200.0;		// Speed Limit
+static const double kDt = ((1.0f/kFrameRate) / kSubSteps);
+static const double kDt2 = (kDt*kDt);
+static const double kNorm =(20/(2*kPi*kH*kH));
+static const double kNearNorm =(30/(2*kPi*kH*kH));
 
-// Auxiliary functions
+#define kEpsilon 0.0000001f
+static const double kEpsilon2 = (kEpsilon*kEpsilon);
+
+#define kCellSize kH
+static const int kGridWidth = (size_t)(kViewWidth / kCellSize);
+static const int kGridHeight = (size_t)(kViewHeight / kCellSize);
+static const int kGridCellCount = kGridWidth * kGridHeight;
+
+
 double randf(double min, double max);
 Vec randf(const Vec &min, const Vec &max);
 Vector3d randf(const Vector3d &min, const Vector3d &max);
-void glCircle(float x, float y, float r, int segments);
 
-
-#endif
+#define kMaxNeighbourCount 64
+#endif /* MACRO_HPP_ */

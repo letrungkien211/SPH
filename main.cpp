@@ -1,111 +1,73 @@
+/*
+ * sph.cpp
+ *
+ *  Created on: Jun 12, 2013
+ *      Author: letrungkien7
+ */
+#include <GL/glut.h>
 #include <iostream>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
-#include <cstdio>
-#include <string>
-
-#include <GL/glut.h>
 #include <eigen3/Eigen/Dense>
-#include <opencv2/opencv.hpp>
-
-#include "system.hpp"
+#include <cassert>
 
 using namespace std;
+using namespace Eigen;
 
+#include "sph.h"
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-System sph;
+SPH sph;
 
 
 void myDisplay(){
-	/*Initialize display*/
-	sph.calculate(DT);
+	glClearColor(0.02f, 0.01f, 0.01f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1.0,1.0,1.0,1.0);
 
-	glPushMatrix();
-	glScaled(40,40,1);
-	sph.draw();
-	glPopMatrix();
+	glPointSize(5);
+	glBegin(GL_POINTS);
+
+	sph.display();
+
+	glEnd();
+
 	glutSwapBuffers();
 }
 
 void myInit(){
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 	sph.init();
-}
-
-void myIdle(){
-	//glutPostRedisplay();
+	getchar();
 }
 
 void myReshape(int w, int h){
-	winWidth = w;
-	winHeight = h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(-20, w+20, -20, h+20);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glViewport(0,0,w,h);
+	glOrtho(0, kViewWidth, 0, kViewHeight, 0, 1);
 }
 
-void myTimer(int value){
-	sph.calculate(DT);
+void myUpdate(){
+	sph.update();
 	glutPostRedisplay();
-	glutTimerFunc(TIMER, myTimer, 0);
 }
 
-void myMouse(int button, int state, int x, int y){
-	mouseButton = button;
-	mouseState = state;
-	mouseX = x;
-	mouseY = y;
-}
 
-void myMotion(int x, int y){
-	switch(mouseButton){
-	case GLUT_LEFT_BUTTON:
-		break;
-	case GLUT_RIGHT_BUTTON:
-		break;
-	default:
-		break;
-	}
-}
-
-void myKeyboard(unsigned char c, int x, int y){
-	switch(c){
-	case 27:
-		exit(1);
-		break;
-	default:
-		break;
-	}
-
-}
-
-int main(int argc, char* argv[]){
-	//---Initialize glut
+int main(int argc, char**argv){
+	glutInitWindowSize(kScreenWidth, kScreenHeight);
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutInitWindowSize(winWidth, winHeight);		// window size
-	glutCreateWindow("ARTISTIC CG - Smoothed Particle Hydrodynamics");				// create window
-
-	//---GLUTへの関数の登録lut
-	glutDisplayFunc(myDisplay);			//Display関数の登録
-	glutIdleFunc(myIdle);				//Idle関数の登録
-	glutTimerFunc(TIMER, myTimer, 0);	// timer
-	glutReshapeFunc(myReshape);			// reshape
-	glutMotionFunc(myMotion); 			// mouse's motion
-	glutMouseFunc(myMouse);				// mouse
-	glutKeyboardFunc(myKeyboard);		// keyboard
-	//glutSpecialFunc();
+	glutInitDisplayString("samples stencil>=3 rgb double depth");
+	glutCreateWindow("Artistic CG Final Project");
+	glutDisplayFunc(myDisplay);
+	glutReshapeFunc(myReshape);
+	glutIdleFunc(myUpdate);
 
 	srand(time(NULL));
 	myInit();
 
-	//---ループの開始
 	glutMainLoop();
 
 	return 0;

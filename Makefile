@@ -1,16 +1,15 @@
 CC = g++ -g -std=c++0x
 RM = rm -rf
 
-LIBS = -lglut -lGL -lGLU -lm -lpthread #`pkg-config opencv --libs`
-INCLUDES = #`pkg-config opencv --cflags`
+LIBS = -lglut -lGL -lGLU -lm -lpthread
 
-TARGET = main
-OBJ = macro.o particle.o system.o grids.o
+TARGET = main 
+OBJ = sph.o macro.o
 all: $(TARGET)
 
 .cpp.o:
-	$(CC) -c $< $(INCLUDES)
+	$(CC) -c $< 
 $(TARGET): %: %.o $(OBJ)
-	$(CC) -o $@ $^ $(LIBS)
+	$(CC) -o $@ $^ $(LIBS) 
 clean:
 	$(RM) *.o $(TARGET) *~ *#*
