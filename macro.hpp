@@ -19,7 +19,7 @@ using namespace Eigen;
 #define kViewWidth 10.0f
 static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kPi 3.1415926535f
-#define kParticleCount 3000
+#define kParticleCount 4000
 
 #define kRestDensity 82.0f
 #define kStiffness 0.08f

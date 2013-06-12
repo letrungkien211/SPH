@@ -16,7 +16,7 @@ SPH::SPH() {
 }
 
 void SPH::init() {
-	N = 3000;
+	N = kParticleCount;
 	grids.resize(kGridCellCount); // move to init functions
 	particles.resize(kParticleCount);
 	For(i,N){
