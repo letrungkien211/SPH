@@ -28,7 +28,7 @@ static const Vector3d COLOR_BLUE = Vector3d(0,0,1);
 //////////////////////////////////////////////////////////////////////////
 static int MAX_LOOP = 1000;
 static Vec INITMIN = Vec(1,1);
-static Vec INITMAX = Vec(2,2);
+static Vec INITMAX = Vec(4,4);
 static Vec MIN = Vec(0.5,0.5);
 static Vec MAX = 5*Vec(1,1);
 static double PI = 3.141;

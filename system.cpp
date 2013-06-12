@@ -27,7 +27,7 @@ void System::init() {
 		particles[i].rho0 = SPH_RESTDENSITY;
 		particles[i].k = SPH_INTSTIFF;
 		particles[i].myu = SPH_VISC;
-		particles[i].m = SPH_PMASS;
+		particles[i].m = 4*particles[i].radius*particles[i].radius*particles[i].rho0;
 	}
 }
 
@@ -58,7 +58,7 @@ void System::calculate(double dt) {
 	for(list<int> l : grids.neighbor){
 		sum += l.size();
 	}
-	cout << sum <<endl;
+	cout << sum << " , " << sum/N<<endl;
 
 	double H2 = H * H;
 	// Density and Pressure
@@ -178,7 +178,7 @@ void System::loadParameter(const string &filename){
 	ifstream input(filename.c_str());
 	input >> SPH_INTSTIFF >> SPH_VISC >> H >> RADIUS >> N;
 	H *= RADIUS;
-	Poly6Kern = 315.0 / ( 64.0 * PI * pow( H, 9 ) );
-	SpikyKern = -45.0 / ( PI * pow( H, 6 ) );
-	LapKern = 45.0 / ( PI * pow( H, 6 ) );
+	Poly6Kern = 4 / ( PI * pow( H, 8 ) );
+	SpikyKern = -10.0 / ( PI * pow( H, 5 ) );
+	LapKern = 1 / (0.3* PI * pow( H, 2 ) );
 }
