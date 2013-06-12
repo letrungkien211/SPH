@@ -16,18 +16,9 @@ SPH::SPH() {
 }
 
 void SPH::init() {
-	N = kParticleCount;
+    N = 0;
 	grids.resize(kGridCellCount); // move to init functions
 	particles.resize(kParticleCount);
-	For(i,N){
-		Particle &p = particles[i];
-		p.r = randf(Vec(2,2), Vec(8,8));
-		p.v = randf(Vec(0,0), Vec(1,1));
-		if(i%2)
-		    p.m = 1.0f;
-		else
-		    p.m = 1.4;
-	}
 
 	walls.resize(4);
 	walls[0] = Wall(1,0,0);
@@ -48,7 +39,11 @@ void SPH::display() {
 }
 
 void SPH::update() {
-	for (int step = 0; step < kSubSteps; step++) {
+    int step;
+    (N== kParticleCount) ? step = kSubSteps-1 : step = 0;
+    for (step = 0; step <kSubSteps; step++) {
+	    For(i,20)
+		emit();
 		applyGravity();
 		advance();
 		updateGrid();
@@ -58,6 +53,25 @@ void SPH::update() {
 		updateGrid();
 		resolveCollisons();
 	}
+}
+
+void SPH::emit(){
+    if(N==kParticleCount)
+	return;
+    N++;
+    Particle &p = particles[N-1];
+    
+
+    if(N%2){
+	p.v = Vec(5,-1);
+	p.r = randf(Vec(2,8), Vec(3,9));
+	p.m = 1.0f;
+    }
+    else{
+	p.v = Vec(-5,-1);
+	p.r = randf(Vec(7,8), Vec(8,9));
+	p.m = 1.4f;
+    }
 }
 
 // Apply gravitational force
@@ -193,7 +207,7 @@ void SPH::resolveCollisons() {
 				float d = pi.v.dot(wall.norm);
 				if (dis < 0)
 					dis = 0;
-				pi.v += 0.5*(kParticleRadius - dis) * wall.norm / kDt;
+				pi.v += (kParticleRadius - dis) * wall.norm / kDt;
 			}
 		}
 	}

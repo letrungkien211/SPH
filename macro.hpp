@@ -29,12 +29,12 @@ static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kQuadraticViscocity 1.0f
 
 #define kParticleRadius 0.05f
-//const double kH = (6*kParticleRadius);
 const double kH = (6*kParticleRadius);
 const double kH2 = kH*kH;
 
-#define kFrameRate 20
+#define kFrameRate 30
 #define kSubSteps 7
+
 
 static const double kDt = ((1.0f/kFrameRate) / kSubSteps);
 static const double kDt2 = (kDt*kDt);

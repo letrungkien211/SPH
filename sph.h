@@ -40,8 +40,6 @@ struct Particle{
 	double density;		// density
 	double nearDensity;	// near density
 
-
-//    Vector3d color;
 	// Supplementary
 	Vec rPrev; // previous position
 	Vec rRelax; // relaxed position
@@ -69,6 +67,7 @@ public:
 
 	void init();
 	void update();
+    void emit();
 	void applyGravity();
 	void advance();
 	void updateGrid();
