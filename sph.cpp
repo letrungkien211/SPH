@@ -16,33 +16,43 @@ SPH::SPH() {
 }
 
 void SPH::init() {
-	N = 3000;
+	N = kParticleCount;
 	grids.resize(kGridCellCount); // move to init functions
 	particles.resize(kParticleCount);
+
 	For(i,N){
 		Particle &p = particles[i];
-		p.r = randf(Vec(2,2), Vec(8,8));
-		p.v = randf(Vec(0,0), Vec(1,1));
-		p.m = 1.0f;
+		if (i > N / 2) {
+			p.r = randf(Vec(0, 5), Vec(1, 6));
+			p.v = randf(Vec(0, 0), Vec(1, 1));
+			p.m = 1.0f;
+			p.color << 1, 0, 0;
+		} else {
+			p.r = randf(Vec(kViewWidth - 2, 5), Vec(kViewWidth - 1, 6));
+			p.v = randf(Vec(-1, 0), Vec(0, 1));
+			p.m = 1.4f;
+			p.color << 0, 1, 0;
+		}
 	}
-
 	walls.resize(4);
-	walls[0] = Wall(1,0,0);
-	walls[1] = Wall(0,1,0);
-	walls[2] = Wall(-1,0,-kViewWidth);
-	walls[3] = Wall(0,-1,-kViewHeight);
-}
+	walls[0] = Wall(1, 0, 0);
+	walls[1] = Wall(0, 1, 0);
+	walls[2] = Wall(-1, 0, -kViewWidth);
+	walls[3] = Wall(0, -1, -kViewHeight);
 
+}
 void SPH::display() {
-	For(i,N){
+	For(i,N)
+					{
 		Particle p = particles[i];
-		glColor3d(1,0,0);
+		glColor3d(p.color[0], p.color[1], p.color[2]);
 		glVertex2d(p.r[0], p.r[1]);
-	}
+					}
 }
 
 void SPH::update() {
 	for (int step = 0; step < kSubSteps; step++) {
+		emit();
 		applyGravity();
 		advance();
 		updateGrid();
@@ -54,11 +64,39 @@ void SPH::update() {
 	}
 }
 
+void SPH::emit() {
+	static int emitDelay = 0;
+	if (++emitDelay < 3)
+		return;
+	if (N == kParticleCount - 1)
+		return;
+	if (N > kParticleCount / 2) {
+		Particle &p = particles[N];
+		p.r = randf(Vec(0, 5), Vec(1, 6));
+		p.v = randf(Vec(0, 0), Vec(1, 1));
+		p.m = 1.0f;
+		p.color << 1, 0, 0;
+	} else {
+		Particle &p = particles[N];
+		p.r = randf(Vec(kViewWidth - 2, 5), Vec(kViewWidth - 1, 6));
+		p.v = randf(Vec(-1, 0), Vec(0, 1));
+		p.m = 1.4f;
+		p.color << 0, 1, 0;
+	}
+	N++;
+
+	cout << N << endl;
+	emitDelay = 0;
+
+	getchar();
+}
+
 // Apply gravitational force
 void SPH::applyGravity() {
-	For(i,N){
+	For(i,N)
+					{
 		particles[i].v[1] -= 9.78f * kDt;
-	}
+					}
 }
 
 // Move particles
@@ -90,7 +128,8 @@ void SPH::updateGrid() {
 }
 
 void SPH::calculatePressure() {
-	For(i,N){
+	For(i,N)
+					{
 		Particle &pi = particles[i];
 		pi.neighbors.clear();
 		double density = 0;
@@ -100,9 +139,10 @@ void SPH::calculatePressure() {
 		int gj = pi.gridIndex[1] * kGridWidth;
 
 		for (int ni = gi - 1; ni <= gi + 1; ++ni) {
-			for (int nj = gj - kGridWidth; nj <= gj + kGridWidth; nj +=kGridWidth) {
+			for (int nj = gj - kGridWidth; nj <= gj + kGridWidth; nj +=
+					kGridWidth) {
 				for (int j : grids[ni + nj]) {
-					if(i==j){
+					if (i == j) {
 						continue;
 					}
 					const Particle &pj = particles[j];
@@ -128,14 +168,15 @@ void SPH::calculatePressure() {
 		pi.nearDensity = nearDensity * kNearNorm;
 		pi.P = kStiffness * (pi.density - pi.m * kRestDensity);
 		pi.nearP = kNearStiffness * pi.nearDensity;
-	}
+					}
 
-	cout << "Calculate pressure done!"<<endl;
+	cout << "Calculate pressure done!" << endl;
 }
 
 void SPH::calculateRelaxedPositions() {
 
-	For(i,N){
+	For(i,N)
+					{
 		Particle &pi = particles[i];
 		Vec pos = pi.r;
 		for (Neigbor nei : pi.neighbors) {
@@ -143,7 +184,9 @@ void SPH::calculateRelaxedPositions() {
 			double r = nei.r;
 			Vec dr = pj.r - pi.r;
 			double a = 1 - r / kH;
-			float d = kDt2* ((pi.nearP + pj.nearP) * a * a * a * kNearNorm+ (pi.P + pj.P) * a * a * kNorm) / 2;
+			float d = kDt2
+					* ((pi.nearP + pj.nearP) * a * a * a * kNearNorm
+							+ (pi.P + pj.P) * a * a * kNorm) / 2;
 
 			// relax
 			pos -= d * dr / (r * pi.m);
@@ -165,21 +208,23 @@ void SPH::calculateRelaxedPositions() {
 			}
 		}
 		pi.rRelax = pos;
-	}
+					}
 
-	cout << "Calculate relaxed position done!"<<endl;
+	cout << "Calculate relaxed position done!" << endl;
 }
 
 void SPH::moveToRelaxedPositions() {
-	For(i,N){
+	For(i,N)
+					{
 		Particle &p = particles[i];
 		p.r = p.rRelax;
 		p.v = (p.r - p.rPrev) / kDt;
-	}
+					}
 }
 
 void SPH::resolveCollisons() {
-	For(i,N){
+	For(i,N)
+					{
 		Particle &pi = particles[i];
 		for (Wall wall : walls) {
 			float dis = wall.norm.dot(pi.r) - wall.c;
@@ -187,9 +232,9 @@ void SPH::resolveCollisons() {
 				float d = pi.v.dot(wall.norm);
 				if (dis < 0)
 					dis = 0;
-				pi.v += 0.5*(kParticleRadius - dis) * wall.norm / kDt;
+				pi.v += 0.5 * (kParticleRadius - dis) * wall.norm / kDt;
 			}
 		}
-	}
+					}
 }
 
