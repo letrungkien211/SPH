@@ -46,8 +46,6 @@ void SPH::update() {
     int step;
     step = (N== kParticleCount) ? kSubSteps-1 : 0;
     for (step = 0; step <kSubSteps; step++) {
-	    For(i,20)
-		emit();
 		applyGravity();
 		advance();
 		updateGrid();
