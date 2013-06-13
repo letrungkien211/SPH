@@ -23,12 +23,11 @@ using namespace Eigen;
 
 SPH sph;
 
-
 void myDisplay(){
 	glClearColor(0.02f, 0.01f, 0.01f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glPointSize(5);
+	glPointSize(6);
 	glBegin(GL_POINTS);
 
 	sph.display();

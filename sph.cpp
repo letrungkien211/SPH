@@ -16,24 +16,10 @@ SPH::SPH() {
 }
 
 void SPH::init() {
-	N = kParticleCount;
+    N = 0;
 	grids.resize(kGridCellCount); // move to init functions
 	particles.resize(kParticleCount);
 
-	For(i,N){
-		Particle &p = particles[i];
-		if (i > N / 2) {
-			p.r = randf(Vec(0, 5), Vec(1, 6));
-			p.v = randf(Vec(0, 0), Vec(1, 1));
-			p.m = 1.0f;
-			p.color << 1, 0, 0;
-		} else {
-			p.r = randf(Vec(kViewWidth - 2, 5), Vec(kViewWidth - 1, 6));
-			p.v = randf(Vec(-1, 0), Vec(0, 1));
-			p.m = 1.4f;
-			p.color << 0, 1, 0;
-		}
-	}
 	walls.resize(4);
 	walls[0] = Wall(1, 0, 0);
 	walls[1] = Wall(0, 1, 0);
@@ -45,13 +31,19 @@ void SPH::display() {
 	For(i,N)
 					{
 		Particle p = particles[i];
-		glColor3d(p.color[0], p.color[1], p.color[2]);
+		if(i%2)
+		    glColor3d(0,1,0);
+		else
+		    glColor3d(0,0,1);
 		glVertex2d(p.r[0], p.r[1]);
 					}
 }
 
 void SPH::update() {
-	for (int step = 0; step < kSubSteps; step++) {
+    int step;
+    step = (N== kParticleCount) ? kSubSteps-1 : 0;
+    for (step = 0; step <kSubSteps; step++) {
+	    For(i,20)
 		emit();
 		applyGravity();
 		advance();
@@ -64,31 +56,23 @@ void SPH::update() {
 	}
 }
 
-void SPH::emit() {
-	static int emitDelay = 0;
-	if (++emitDelay < 3)
-		return;
-	if (N == kParticleCount - 1)
-		return;
-	if (N > kParticleCount / 2) {
-		Particle &p = particles[N];
-		p.r = randf(Vec(0, 5), Vec(1, 6));
-		p.v = randf(Vec(0, 0), Vec(1, 1));
-		p.m = 1.0f;
-		p.color << 1, 0, 0;
-	} else {
-		Particle &p = particles[N];
-		p.r = randf(Vec(kViewWidth - 2, 5), Vec(kViewWidth - 1, 6));
-		p.v = randf(Vec(-1, 0), Vec(0, 1));
-		p.m = 1.4f;
-		p.color << 0, 1, 0;
-	}
-	N++;
+void SPH::emit(){
+    if(N==kParticleCount)
+	return;
+    N++;
+    Particle &p = particles[N-1];
+    
 
-	cout << N << endl;
-	emitDelay = 0;
-
-	getchar();
+    if(N%2){
+	p.v = Vec(5,-1);
+	p.r = randf(Vec(2,8), Vec(3,9));
+	p.m = 1.0f;
+    }
+    else{
+	p.v = Vec(-5,-1);
+	p.r = randf(Vec(7,8), Vec(8,9));
+	p.m = 1.4f;
+    }
 }
 
 // Apply gravitational force
@@ -170,7 +154,6 @@ void SPH::calculatePressure() {
 		pi.nearP = kNearStiffness * pi.nearDensity;
 					}
 
-	cout << "Calculate pressure done!" << endl;
 }
 
 void SPH::calculateRelaxedPositions() {
@@ -210,7 +193,6 @@ void SPH::calculateRelaxedPositions() {
 		pi.rRelax = pos;
 					}
 
-	cout << "Calculate relaxed position done!" << endl;
 }
 
 void SPH::moveToRelaxedPositions() {
@@ -232,7 +214,8 @@ void SPH::resolveCollisons() {
 				float d = pi.v.dot(wall.norm);
 				if (dis < 0)
 					dis = 0;
-				pi.v += 0.5 * (kParticleRadius - dis) * wall.norm / kDt;
+				pi.v += (kParticleRadius - dis) * wall.norm / kDt;
+
 			}
 		}
 					}

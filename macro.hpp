@@ -4,7 +4,6 @@
  *  Created on: Jun 12, 2013
  *      Author: letrungkien7
  */
-
 #ifndef MACRO_HPP_
 #define MACRO_HPP_
 
@@ -20,7 +19,7 @@ using namespace Eigen;
 #define kViewWidth 10.0f
 static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kPi 3.1415926535f
-#define kParticleCount 3000
+#define kParticleCount 4000
 
 #define kRestDensity 82.0f
 #define kStiffness 0.08f
@@ -33,8 +32,9 @@ static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 const double kH = (6*kParticleRadius);
 const double kH2 = kH*kH;
 
-#define kFrameRate 20
+#define kFrameRate 30
 #define kSubSteps 7
+
 
 static const double kDt = ((1.0f/kFrameRate) / kSubSteps);
 static const double kDt2 = (kDt*kDt);
@@ -44,6 +44,7 @@ static const double kNearNorm =(30/(2*kPi*kH*kH));
 #define kEpsilon 0.0000001f
 static const double kEpsilon2 = (kEpsilon*kEpsilon);
 
+//#define kCellSize kH
 #define kCellSize kH
 static const int kGridWidth = (size_t)(kViewWidth / kCellSize);
 static const int kGridHeight = (size_t)(kViewHeight / kCellSize);
