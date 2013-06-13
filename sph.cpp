@@ -8,6 +8,9 @@
 #include "sph.h"
 #include <GL/glut.h>
 #include <iostream>
+#include <omp.h>
+
+#define CHUNKSIZE 100
 
 using namespace std;
 
@@ -61,15 +64,14 @@ void SPH::emit(){
 	return;
     N++;
     Particle &p = particles[N-1];
-    
 
     if(N%2){
-	p.v = Vec(5,-1);
+	p.v = Vec(10,-4);
 	p.r = randf(Vec(2,8), Vec(3,9));
 	p.m = 1.0f;
     }
     else{
-	p.v = Vec(-5,-1);
+	p.v = Vec(-10,-4);
 	p.r = randf(Vec(7,8), Vec(8,9));
 	p.m = 1.4f;
     }
@@ -77,6 +79,7 @@ void SPH::emit(){
 
 // Apply gravitational force
 void SPH::applyGravity() {
+#pragma omp parallel for
 	For(i,N)
 					{
 		particles[i].v[1] -= 9.78f * kDt;
@@ -85,7 +88,9 @@ void SPH::applyGravity() {
 
 // Move particles
 void SPH::advance() {
-	for (Particle &p : particles) {
+#pragma omp parallel for
+	For(i,N){
+		Particle &p = particles[i];
 		p.rPrev = p.r;
 		p.r += p.v * kDt;
 	}
@@ -96,6 +101,7 @@ void SPH::updateGrid() {
 	for (list<int> &l : grids) {
 		l.clear();
 	}
+#pragma omp parallel for
 	For(i,N)
 	{
 		Particle &p = particles[i];
@@ -112,6 +118,7 @@ void SPH::updateGrid() {
 }
 
 void SPH::calculatePressure() {
+#pragma omp parallel for
 	For(i,N)
 					{
 		Particle &pi = particles[i];
@@ -157,7 +164,7 @@ void SPH::calculatePressure() {
 }
 
 void SPH::calculateRelaxedPositions() {
-
+#pragma omp parallel for
 	For(i,N)
 					{
 		Particle &pi = particles[i];
@@ -192,10 +199,11 @@ void SPH::calculateRelaxedPositions() {
 		}
 		pi.rRelax = pos;
 					}
-
 }
 
 void SPH::moveToRelaxedPositions() {
+
+#pragma omp parallel for
 	For(i,N)
 					{
 		Particle &p = particles[i];
@@ -205,6 +213,7 @@ void SPH::moveToRelaxedPositions() {
 }
 
 void SPH::resolveCollisons() {
+#pragma omp parallel for
 	For(i,N)
 					{
 		Particle &pi = particles[i];
