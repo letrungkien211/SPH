@@ -52,6 +52,21 @@ void myReshape(int w, int h){
 void myUpdate(){
 	sph.update();
 	glutPostRedisplay();
+
+}
+
+void myKeyboard(unsigned char c, int x, int y){
+       switch(c){
+       case 27:
+               exit(1);
+               break;
+       case 'e':
+	   For(i,20)
+	       sph.emit();
+	   break;
+       default:
+               break;
+      }
 }
 
 
@@ -64,6 +79,7 @@ int main(int argc, char**argv){
 	glutReshapeFunc(myReshape);
 	glutIdleFunc(myUpdate);
 
+	glutKeyboardFunc(myKeyboard);
 	srand(time(NULL));
 	myInit();
 
