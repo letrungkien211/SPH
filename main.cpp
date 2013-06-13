@@ -24,10 +24,10 @@ using namespace Eigen;
 SPH sph;
 
 void myDisplay(){
-	glClearColor(0.02f, 0.01f, 0.01f, 1);
+	glClearColor(0.4f, 0.1f, 0.1f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glPointSize(6);
+	glPointSize(5);
 	glBegin(GL_POINTS);
 
 	sph.display();
@@ -54,6 +54,17 @@ void myUpdate(){
 	glutPostRedisplay();
 }
 
+void myKeyboard(unsigned char c, int x, int y){
+	switch(c){
+	case 27:
+		exit(1);
+		break;
+	default:
+		break;
+	}
+
+}
+
 
 int main(int argc, char**argv){
 	glutInitWindowSize(kScreenWidth, kScreenHeight);
@@ -63,7 +74,7 @@ int main(int argc, char**argv){
 	glutDisplayFunc(myDisplay);
 	glutReshapeFunc(myReshape);
 	glutIdleFunc(myUpdate);
-
+	glutKeyboardFunc(myKeyboard);		// keyboard
 	srand(time(NULL));
 	myInit();
 

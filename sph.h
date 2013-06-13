@@ -11,6 +11,8 @@
 #include <vector>
 #include <eigen3/Eigen/Dense>
 #include <list>
+#include <iostream>
+#include <fstream>
 
 using namespace Eigen;
 using namespace std;
@@ -64,6 +66,7 @@ public:
 	vector<Wall> walls;
 
 	int N;		// number of particles
+    ofstream output;
 
 	void init();
 	void update();

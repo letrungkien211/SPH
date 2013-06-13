@@ -2,7 +2,7 @@
  * sph.cpp
  *
  *  Created on: Jun 12, 2013
- *      Author: letrungkien7
+ *      Author: letrungken7
  */
 
 #include "sph.h"
@@ -18,6 +18,8 @@ SPH::SPH() {
     // TODO Auto-generated constructor stub
 }
 
+double maxDensity;
+
 void SPH::init() {
     N = 0;
     grids.resize(kGridCellCount); // move to init functions
@@ -28,15 +30,15 @@ void SPH::init() {
     walls[1] = Wall(0, 1, 0);
     walls[2] = Wall(-1, 0, -kViewWidth);
     walls[3] = Wall(0, -1, -kViewHeight);
-
 }
 void SPH::display() {
     For(i,N){
 	Particle p = particles[i];
-	if(i%2)
-	    glColor3d(0,1,0);
+//	if(i%2)
+	if(i>kParticleCount/2)
+	    glColor3d(0.5,0.7*p.density/maxDensity+0.3,0);
 	else
-	    glColor3d(0,0,1);
+	    glColor3d(0,0.1,0.7*p.density/maxDensity+0.3);
 	glVertex2d(p.r[0], p.r[1]);
     }
 }
@@ -45,7 +47,7 @@ void SPH::update() {
     int step;
     step = (N== kParticleCount) ? kSubSteps-1 : 0;
     for (step = 0; step <kSubSteps; step++) {
-	For(i,20)
+	For(i,10)
 	    emit();
 	applyGravity();
 	advance();
@@ -64,14 +66,15 @@ void SPH::emit(){
     N++;
     Particle &p = particles[N-1];
 
-    if(N%2){
-	p.v = Vec(10,-4);
-	p.r = randf(Vec(2,8), Vec(3,9));
+//    if(N%2){
+    if(N>kParticleCount/2){
+	p.v = Vec(1,-20);
+	p.r = randf(Vec(2,kViewHeight-2), Vec(3,kViewHeight-1));
 	p.m = 1.0f;
     }
     else{
-	p.v = Vec(-10,-4);
-	p.r = randf(Vec(7,8), Vec(8,9));
+	p.v = Vec(-1,-20);
+	p.r = randf(Vec(kViewWidth-2,kViewHeight-2), Vec(kViewWidth-1,kViewHeight-1));
 	p.m = 1.4f;
     }
 }
@@ -113,6 +116,7 @@ void SPH::updateGrid() {
 }
 
 void SPH::calculatePressure() {
+    maxDensity = 0;
     For(i,N){
 	Particle &pi = particles[i];
 	pi.neighbors.clear();
@@ -152,6 +156,7 @@ void SPH::calculatePressure() {
 	pi.nearDensity = nearDensity * kNearNorm;
 	pi.P = kStiffness * (pi.density - pi.m * kRestDensity);
 	pi.nearP = kNearStiffness * pi.nearDensity;
+	maxDensity = max(pi.density, maxDensity);
     }
 
 }
