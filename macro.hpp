@@ -16,26 +16,22 @@ using namespace Eigen;
 
 #define kScreenWidth 640
 #define kScreenHeight 640
-//#define kViewWidth 10.0f // default
-#define kViewWidth 5.0
-static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
+#define kViewWidth 10.0f
+static const int kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kPi 3.1415926535f
-#define kParticleCount 5000
-
-
+#define kParticleCount 3000
+#define kRestDensity 82.0f
 #define kStiffness 0.08f
 #define kNearStiffness 0.1f
-//#define kSurfaceTension 0.0004f // default
 #define kSurfaceTension 0.0004f
-#define kLinearViscocity 0.5f*20
-#define kQuadraticViscocity 1.0f*20
+#define kLinearViscocity 0.5f
+#define kQuadraticViscocity 1.0f
 
 #define kParticleRadius 0.05f
-#define kRestDensity 0.1*1.0/(4*kPi*kParticleRadius*kParticleRadius)
 const double kH = (6*kParticleRadius);
 const double kH2 = kH*kH;
 
-#define kFrameRate 30
+#define kFrameRate 20
 #define kSubSteps 7
 
 
@@ -57,5 +53,5 @@ double randf(double min, double max);
 Vec randf(const Vec &min, const Vec &max);
 Vector3d randf(const Vector3d &min, const Vector3d &max);
 
-#define kMaxNeighbourCount 64 // default
+#define kMaxNeighbourCount 64
 #endif /* MACRO_HPP_ */

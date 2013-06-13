@@ -11,9 +11,7 @@
 #include <vector>
 #include <eigen3/Eigen/Dense>
 #include <list>
-#include <iostream>
 #include <fstream>
-
 using namespace Eigen;
 using namespace std;
 
@@ -65,13 +63,15 @@ public:
 	vector<list<int> > grids; 	// grids
 	vector<Wall> walls;
 
-	int N;		// number of particles
+    int N;		// number of particles
     ofstream output;
+    ifstream input;
 
 	void init();
 	void update();
 	void emit();
-
+    void outline(int index);
+    void save();
 	void applyGravity();
 	void advance();
 	void updateGrid();

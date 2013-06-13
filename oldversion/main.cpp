@@ -47,6 +47,7 @@ void myReshape(int w, int h){
 	gluOrtho2D(-20, w+20, -20, h+20);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glViewport(0,0,w,h);
 }
 
 void myTimer(int value){

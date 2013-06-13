@@ -1,8 +1,8 @@
-/*
+/*emit
  * sph.cpp
  *
  *  Created on: Jun 12, 2013
- *      Author: letrungken7
+ *      Author: letrungkien7
  */
 
 #include "sph.h"
@@ -18,27 +18,63 @@ SPH::SPH() {
     // TODO Auto-generated constructor stub
 }
 
-double maxDensity;
+void SPH::outline(int index){
+    if(index ==1){
+	N = kParticleCount;
+	For(i,10){
+	    For(j,kParticleCount/20){
+		Particle &p = particles[i+10*j];
+		p.r[0] = 2+3*i*kParticleRadius;
+		p.r[1] = 2+3*j*kParticleRadius;
+		p.v = Vec(0,-10);
+		p.m = 1.5f;
+	    }
+	}
+	
+	for(int i=10; i<20;i++){
+	    For(j,kParticleCount/20){
+		Particle &p = particles[i-10+kParticleCount/2+10*j];
+		p.r[0] = 2+3*i*kParticleRadius;
+		p.r[1] = 2+3*j*kParticleRadius;
+		p.v = Vec(0,-10);
+		p.m = 1.0f;
+
+	    }
+	}
+	
+    }
+    else{
+
+    }
+}
+
 
 void SPH::init() {
-    N = 0;
     grids.resize(kGridCellCount); // move to init functions
     particles.resize(kParticleCount);
+    outline(1);
+
 
     walls.resize(4);
     walls[0] = Wall(1, 0, 0);
     walls[1] = Wall(0, 1, 0);
     walls[2] = Wall(-1, 0, -kViewWidth);
     walls[3] = Wall(0, -1, -kViewHeight);
+
 }
+
+bool test(int i){
+    return i > kParticleCount/2;
+}
+
 void SPH::display() {
-    For(i,N){
+    For(i,N)
+    {
 	Particle p = particles[i];
-//	if(i%2)
-	if(i>kParticleCount/2)
-	    glColor3d(0.5,0.7*p.density/maxDensity+0.3,0);
+	if(test(i))
+	    glColor3d(0,1,0);
 	else
-	    glColor3d(0,0.1,0.7*p.density/maxDensity+0.3);
+	    glColor3d(0,0,1);
 	glVertex2d(p.r[0], p.r[1]);
     }
 }
@@ -47,8 +83,7 @@ void SPH::update() {
     int step;
     step = (N== kParticleCount) ? kSubSteps-1 : 0;
     for (step = 0; step <kSubSteps; step++) {
-	For(i,10)
-	    emit();
+	emit();
 	applyGravity();
 	advance();
 	updateGrid();
@@ -58,7 +93,20 @@ void SPH::update() {
 	updateGrid();
 	resolveCollisons();
     }
+    save();
 }
+
+void SPH::save(){
+    static int count = 0;
+    output << count++ << " ";
+    output << N <<" ";
+    For(i,N){
+	const Particle &p = particles[i];
+	output << p.r.transpose() << " ";
+    }
+    output << endl;
+}
+
 
 void SPH::emit(){
     if(N==kParticleCount)
@@ -66,21 +114,26 @@ void SPH::emit(){
     N++;
     Particle &p = particles[N-1];
 
-//    if(N%2){
-    if(N>kParticleCount/2){
-	p.v = Vec(1,-20);
-	p.r = randf(Vec(2,kViewHeight-2), Vec(3,kViewHeight-1));
-	p.m = 1.0f;
-    }
-    else{
-	p.v = Vec(-1,-20);
-	p.r = randf(Vec(kViewWidth-2,kViewHeight-2), Vec(kViewWidth-1,kViewHeight-1));
-	p.m = 1.4f;
+
+    For(step, 20){
+	if(test(N)){
+	    p.v = Vec(1,9);
+	    p.r = randf(Vec(2,8), Vec(3,9));
+//	    p.m = 1.0f;
+	    p.m = 2.0f;
+	}
+	else{
+	    p.v = Vec(-1,9);
+	    p.r = randf(Vec(7,8), Vec(8,9));
+//	    p.m = 1.4f; default
+	    p.m = 1.0f;
+	}
     }
 }
 
 // Apply gravitational force
 void SPH::applyGravity() {
+#pragma omp parallel for
     For(i,N)
     {
 	particles[i].v[1] -= 9.78f * kDt;
@@ -89,6 +142,7 @@ void SPH::applyGravity() {
 
 // Move particles
 void SPH::advance() {
+#pragma omp parallel for
     For(i,N){
 	Particle &p = particles[i];
 	p.rPrev = p.r;
@@ -101,7 +155,9 @@ void SPH::updateGrid() {
     for (list<int> &l : grids) {
 	l.clear();
     }
-    For(i,N){
+#pragma omp parallel for
+    For(i,N)
+    {
 	Particle &p = particles[i];
 	int x = p.r[0] / kCellSize;
 	int y = p.r[1] / kCellSize;
@@ -116,8 +172,9 @@ void SPH::updateGrid() {
 }
 
 void SPH::calculatePressure() {
-    maxDensity = 0;
-    For(i,N){
+#pragma omp parallel for
+    For(i,N)
+    {
 	Particle &pi = particles[i];
 	pi.neighbors.clear();
 	double density = 0;
@@ -156,13 +213,14 @@ void SPH::calculatePressure() {
 	pi.nearDensity = nearDensity * kNearNorm;
 	pi.P = kStiffness * (pi.density - pi.m * kRestDensity);
 	pi.nearP = kNearStiffness * pi.nearDensity;
-	maxDensity = max(pi.density, maxDensity);
     }
 
 }
 
 void SPH::calculateRelaxedPositions() {
-    For(i,N){
+#pragma omp parallel for
+    For(i,N)
+    {
 	Particle &pi = particles[i];
 	Vec pos = pi.r;
 	for (Neigbor nei : pi.neighbors) {
@@ -198,7 +256,10 @@ void SPH::calculateRelaxedPositions() {
 }
 
 void SPH::moveToRelaxedPositions() {
-    For(i,N){
+
+#pragma omp parallel for
+    For(i,N)
+    {
 	Particle &p = particles[i];
 	p.r = p.rRelax;
 	p.v = (p.r - p.rPrev) / kDt;
@@ -206,7 +267,9 @@ void SPH::moveToRelaxedPositions() {
 }
 
 void SPH::resolveCollisons() {
-    For(i,N){
+#pragma omp parallel for
+    For(i,N)
+    {
 	Particle &pi = particles[i];
 	for (Wall wall : walls) {
 	    float dis = wall.norm.dot(pi.r) - wall.c;
