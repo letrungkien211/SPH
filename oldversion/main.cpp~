@@ -44,7 +44,7 @@ void myReshape(int w, int h){
 	winHeight = h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(-20, w+20, -20, h+20);
+	gluOrtho(-20, w+20, -20, h+20,0,1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }

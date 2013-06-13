@@ -24,7 +24,8 @@ static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kRestDensity 82.0f
 #define kStiffness 0.08f
 #define kNearStiffness 0.1f
-#define kSurfaceTension 0.0004f
+//#define kSurfaceTension 0.0004f // default
+#define kSurfaceTension 0.0006f
 #define kLinearViscocity 0.5f
 #define kQuadraticViscocity 1.0f
 
@@ -44,7 +45,6 @@ static const double kNearNorm =(30/(2*kPi*kH*kH));
 #define kEpsilon 0.0000001f
 static const double kEpsilon2 = (kEpsilon*kEpsilon);
 
-//#define kCellSize kH
 #define kCellSize kH
 static const int kGridWidth = (size_t)(kViewWidth / kCellSize);
 static const int kGridHeight = (size_t)(kViewHeight / kCellSize);
@@ -55,5 +55,5 @@ double randf(double min, double max);
 Vec randf(const Vec &min, const Vec &max);
 Vector3d randf(const Vector3d &min, const Vector3d &max);
 
-#define kMaxNeighbourCount 64
+#define kMaxNeighbourCount 64 // default
 #endif /* MACRO_HPP_ */
