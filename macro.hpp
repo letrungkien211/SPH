@@ -17,9 +17,10 @@ using namespace Eigen;
 #define kScreenWidth 640
 #define kScreenHeight 640
 #define kViewWidth 10.0f
-static const int kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
+static const double kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 #define kPi 3.1415926535f
-#define kParticleCount 3000
+#define kParticleCount 4000
+
 #define kRestDensity 82.0f
 #define kStiffness 0.08f
 #define kNearStiffness 0.1f
@@ -31,7 +32,7 @@ static const int kViewHeight = (kScreenHeight*kViewWidth/kScreenWidth);
 const double kH = (6*kParticleRadius);
 const double kH2 = kH*kH;
 
-#define kFrameRate 20
+#define kFrameRate 30
 #define kSubSteps 7
 
 
@@ -43,6 +44,7 @@ static const double kNearNorm =(30/(2*kPi*kH*kH));
 #define kEpsilon 0.0000001f
 static const double kEpsilon2 = (kEpsilon*kEpsilon);
 
+//#define kCellSize kH
 #define kCellSize kH
 static const int kGridWidth = (size_t)(kViewWidth / kCellSize);
 static const int kGridHeight = (size_t)(kViewHeight / kCellSize);

@@ -9,6 +9,7 @@
 #include <vector>
 #include <eigen3/Eigen/Dense>
 #include <cassert>
+#include <cstdio>
 
 using namespace std;
 using namespace Eigen;
@@ -37,9 +38,8 @@ void myDisplay(){
 	glutSwapBuffers();
 }
 
-void myInit(int argc, char**argv){
+void myInit(){
 	glEnable(GL_PROGRAM_POINT_SIZE);
-	sph.output.open(argv[1]);
 	sph.init();
 	getchar();
 }
@@ -54,17 +54,6 @@ void myUpdate(){
 	sph.update();
 	glutPostRedisplay();
 }
-void myKeyboard(unsigned char c, int x, int y){
-	switch(c){
-	case 27:
-	    sph.output.close();
-		exit(1);
-		break;
-	default:
-		break;
-	}
-
-}
 
 
 int main(int argc, char**argv){
@@ -75,9 +64,9 @@ int main(int argc, char**argv){
 	glutDisplayFunc(myDisplay);
 	glutReshapeFunc(myReshape);
 	glutIdleFunc(myUpdate);
-	glutKeyboardFunc(myKeyboard);
+
 	srand(time(NULL));
-	myInit(argc, argv);
+	myInit();
 
 	glutMainLoop();
 
