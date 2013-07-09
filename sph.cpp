@@ -8,7 +8,6 @@
 #include "sph.h"
 #include <GL/glut.h>
 #include <iostream>
-#include <omp.h>
 
 #define CHUNKSIZE 100
 

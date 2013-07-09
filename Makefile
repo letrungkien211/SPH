@@ -1,7 +1,7 @@
 CC = g++ -g -std=c++0x
 RM = rm -rf
 
-LIBS = -lglut -lGL -lGLU -lm -lpthread -fopenmp
+LIBS = -lglut -lGL -lGLU -lm
 
 TARGET = main 
 OBJ = sph.o macro.o
